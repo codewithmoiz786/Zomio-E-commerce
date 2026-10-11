@@ -1,0 +1,161 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+button:active {
+    scale: 0.98;
+}
+
+:root {
+    /* Main Brand */
+    --primary: #FF6B00;
+    --primary-dark: #E85A00;
+    --primary-light: #FFF1E6;
+
+    /* UI Colors z*/
+    --accent: #FF8C42;
+    --soft-orange: #FFD6B0;
+
+    /* Neutral */
+    --bg: #FAFAFA;
+    --text: #1F1F1F;
+    --gray: #6B7280;
+
+    /* Borders */
+    --border: #E5E7EB;
+}
+
+body {
+    overflow-x: hidden;
+    font-family: "Poppins", sans-serif;
+
+}
+
+.move {
+    animation: move 0.2s ease-in;
+}
+
+@keyframes move {
+    from {
+        opacity: 0;
+        top: 0;
+    }
+}
+
+.noti {
+    animation: noti 0.2s ease-in;
+}
+
+@keyframes noti {
+    from {
+        right: -100px;
+
+    }
+}
+
+@media (max-width:450px) {
+    .nav {
+        display: none;
+    }
+}
+
+.hideScrollBar::-webkit-scrollbar {
+    display: none;
+}
+
+.left {
+    animation: left 0.3s ease;
+}
+
+@keyframes left {
+    from {
+        left: -600px
+    }
+
+    to {
+        left: 0%
+    }
+}
+
+.right {
+    animation: right 0.3s ease;
+}
+
+
+@keyframes right {
+    from {
+        right: -100%
+    }
+
+    to {
+        right: 0%
+    }
+}
+
+.page-transition {
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+
+.btn2 {
+    background: linear-gradient(90deg, #ff4d00, #2b2b2b);
+    border: none;
+    border-radius: 50px;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+    text-decoration: none;
+}
+
+.btn {
+    background: linear-gradient(90deg, #101012, #dd7b04);
+    border: none;
+    border-radius: 50px;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+    text-decoration: none;
+}
+
+.btn:hover,
+.btn2:hover {
+    transform: translateY(-1px);
+    box-shadow: 0px 0px 7px #dd7b04;
+}
+
+.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: translateY(0px);
+}
+
+.disabled:hover {
+    transform: translateY(0px);
+    box-shadow: none;
+
+}
+input, select, textarea {
+  font-size: 16px;
+}
+.removeBg{
+    background-color: #0055ff;
+}
