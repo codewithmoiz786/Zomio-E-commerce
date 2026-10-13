@@ -33,6 +33,8 @@ const Products = ({ search = "" }) => {
     const [products, setproducts] = useState([])
 
     const debouncedSearch = useDebounce(search, 400)
+    const isSearching = search !== debouncedSearch
+
 
     async function fetchdata() {
         let url = `http://localhost:3000/api/upload/getProducts?page=${page}&limit=${limit}`
@@ -124,7 +126,7 @@ const Products = ({ search = "" }) => {
             </div>
 
             <div className='px-2 py-3'>
-                {loading ?
+                {(loading || isSearching) ?
                     <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2'>
                         {Array(8).fill(null).map((_, i) => <SkeletonCard key={i} />)}
                     </div>
