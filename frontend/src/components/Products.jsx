@@ -4,6 +4,15 @@ import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-do
 import SkeletonCard from './Skeleton'
 import { triggerCartUpdate } from '../utils/cartHelper'
 
+function useDebounce(value, delay) {
+    const [debounced, setDebounced] = useState(value);
+    useEffect(() => {
+        const timer = setTimeout(() => setDebounced(value), delay);
+        return () => clearTimeout(timer);
+    }, [value, delay]);
+    return debounced;
+}
+
 const Products = ({ search = "" }) => {
     const Navigate = useNavigate()
     let location = useLocation()
@@ -21,8 +30,9 @@ const Products = ({ search = "" }) => {
 
     const [error, seterror] = useState("")
     const [success, setsuccess] = useState("")
-
     const [products, setproducts] = useState([])
+
+    const debouncedSearch = useDebounce(search, 400)
 
     async function fetchdata() {
         let url = `http://localhost:3000/api/upload/getProducts?page=${page}&limit=${limit}`
@@ -30,16 +40,20 @@ const Products = ({ search = "" }) => {
         if (category && category !== "All") {
             url = `http://localhost:3000/api/upload/product?category=${category}&page=${page}&limit=10`
         }
-
-        let res = await fetch(url)
-        let data = await res.json()
-        settotalPages(data.pages || 1)
-        setproducts(data.products || data.filter?.category || []);
-        setloading(false)
+        try {
+            let res = await fetch(url)
+            let data = await res.json()
+            settotalPages(data.pages || 1)
+            setproducts(data.products || data.filter?.category || []);
+        } catch (err) {
+            console.log(err)
+        } finally {
+            setloading(false)
+        }
     }
 
     useEffect(() => {
-        if (location.pathname === "/products" && category === "All") {
+        if (location.pathname === "/products" && category === "All" && !Search.get("page")) {
             setSearch({ category, page: page, limit })
         }
     }, [])
@@ -81,11 +95,13 @@ const Products = ({ search = "" }) => {
     }
 
     const filteredProducts = useMemo(() => {
-        if (!search.trim()) return products
+        if (!debouncedSearch.trim()) return products
+        const q = debouncedSearch.trim().toLowerCase()
         return products.filter((p) => {
-            return p.title.toLowerCase().includes(search.trim().toLowerCase())
+            return p.title.toLowerCase().includes(q) ||
+                p.description?.toLowerCase().includes(q)
         })
-    }, [search, products])
+    }, [debouncedSearch, products])
 
     return (
         <div className='min-h-screen bg-gray-100 '>
@@ -116,7 +132,7 @@ const Products = ({ search = "" }) => {
                     <>
                         {filteredProducts.length === 0 ?
                             <div className='overflow-x-hidden text-center py-20 text-gray-500'>
-                                <p className='text-sm'>We're sorry <span className='text-accent font-semibold '>{search || category}</span> not found</p>
+                                <p className='text-sm'>We're sorry <span className='text-accent font-semibold '>{debouncedSearch || category}</span> not found</p>
                             </div>
                             :
                             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
