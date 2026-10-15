@@ -8,8 +8,6 @@ const imagekit = new Imagekit({
     publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
     urlEndpoint: process.env.URL_END_POINT
 })
-
-
 async function product(req, res) {
     let { title, description, price, category, quantity } = req.body
     try {
@@ -54,12 +52,10 @@ async function product(req, res) {
         })
     }
 }
-
 async function getProducts(req, res) {
     try {
         let page = Number(req.query.page) || 1
-        let limit = Number(req.query.limit) || 10
-
+        let limit = Math.min(40, Math.max(1, Number(req.query.limit) || 12))
         let skip = (page - 1) * limit
 
         let products = await productModel.find()
@@ -68,7 +64,7 @@ async function getProducts(req, res) {
             .limit(limit)
             .sort({ createdAt: -1 })
 
-        let productLength = await (await productModel.find()).length
+        let productLength = await productModel.countDocuments()
 
         let pages = Math.ceil(productLength / limit)
 
@@ -83,7 +79,6 @@ async function getProducts(req, res) {
         })
     }
 }
-
 async function editProduct(req, res) {
     try {
         let { id } = req.params
@@ -116,7 +111,6 @@ async function editProduct(req, res) {
     }
 
 }
-
 async function deleteProduct(req, res) {
     try {
         const { productId } = req.body
@@ -146,7 +140,6 @@ async function deleteProduct(req, res) {
     }
 
 }
-
 async function getProductById(req, res) {
     try {
         let { id } = req.params;
@@ -165,23 +158,33 @@ async function getProductById(req, res) {
     }
 }
 async function findByCategory(req, res) {
-    let { category } = req.query
     try {
+        let { category, search, page = 1, limit = 12 } = req.query
 
-        if (!category) {
-            return res.status(401).json({
-                message: "Category isn't found"
-            })
-        }
+        page = Math.max(1, parseInt(page) || 1)
+        limit = Math.min(40, Math.max(1, parseInt(limit) || 12))
         let filter = {}
-        let product = await productModel.find({ category })
-        if (product) {
-            filter.category = product
+
+        if (category && category !== "All") {
+            filter.category = category
         }
+        if (search && search.trim() !== '') {
+            filter.title = { $regex: search, $options: 'i' }
+        }
+        const skip = (page - 1) * limit
+        const [products, total] = await Promise.all([
+            productModel.find(filter).skip(skip).limit(limit).lean(),
+            productModel.countDocuments(filter)
+        ])
+
+
         res.status(200).json({
-            message: "Category fetch successfully",
-            filter
-        })
+            success: true,
+            total,
+            totalPages: Math.ceil(total / limit),
+            currentPage: page,
+            products
+        });
     } catch (err) {
         res.status(500).json({
             message: err.message

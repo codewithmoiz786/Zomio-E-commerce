@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import api from '../utils/Api'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import SkeletonCard from './Skeleton'
@@ -16,37 +16,37 @@ function useDebounce(value, delay) {
 const Products = ({ search = "" }) => {
     const Navigate = useNavigate()
     let location = useLocation()
+    const [SearchParams, setSearchParams] = useSearchParams()
 
     const [loading, setloading] = useState(false)
-    const [Search, setSearch] = useSearchParams()
-
     const [totalPages, settotalPages] = useState(1)
-
-    let category = Search.get("category") || "All"
-    let page = Number(Search.get("page")) || 1
-    let limit = 15
-
-    const categories = ["All", "Perfumes", "Electronics", "Clothes", "Laptop", "Watches", "Boys", "Girls", "Fashion"]
-
     const [error, seterror] = useState("")
     const [success, setsuccess] = useState("")
     const [products, setproducts] = useState([])
 
+    let category = SearchParams.get("category") || "All"
+    let page = Number(SearchParams.get("page")) || 1
+    let limit = Number(SearchParams.get("limit")) || 12
+
+
+    const categories = ["All", "Perfumes", "Electronics", "Clothes", "Laptop", "Watches", "Boys", "Girls", "Fashion"]
+
     const debouncedSearch = useDebounce(search, 400)
     const isSearching = search !== debouncedSearch
 
-
     async function fetchdata() {
-        let url = `http://localhost:3000/api/upload/getProducts?page=${page}&limit=${limit}`
         setloading(true)
-        if (category && category !== "All") {
-            url = `http://localhost:3000/api/upload/product?category=${category}&page=${page}&limit=10`
-        }
         try {
-            let res = await fetch(url)
+            const params = new URLSearchParams({
+                category,
+                page,
+                limit,
+                search: debouncedSearch
+            })
+            let res = await fetch(`http://localhost:3000/api/upload/product?${params}`)
             let data = await res.json()
-            settotalPages(data.pages || 1)
-            setproducts(data.products || data.filter?.category || []);
+            setproducts(data.products || [])
+            settotalPages(data.totalPages || 1)
         } catch (err) {
             console.log(err)
         } finally {
@@ -55,27 +55,31 @@ const Products = ({ search = "" }) => {
     }
 
     useEffect(() => {
-        if (location.pathname === "/products" && category === "All" && !Search.get("page")) {
-            setSearch({ category, page: page, limit })
+        if (location.pathname === "/products" && !SearchParams.get("category")) {
+            setSearchParams({ category, page, limit })
         }
     }, [])
 
+    useEffect(() => {
+        if (debouncedSearch) {
+            setSearchParams({ category, page: 1, limit })
+        }
+        fetchdata()
+
+    }, [category, page, debouncedSearch])
+
     const handleNext = () => {
         if (totalPages > page) {
-            setSearch({ category, page: page + 1, limit })
+            setSearchParams({ category, page: page + 1, limit })
             window.scrollTo(0, 0)
         }
     }
     const handlePrev = () => {
         if (page > 1) {
-            setSearch({ category, page: page - 1, limit })
+            setSearchParams({ category, page: page - 1, limit })
             window.scrollTo(0, 0)
         }
     }
-
-    useEffect(() => {
-        fetchdata()
-    }, [category, page])
 
     const addToCart = async (productId, e) => {
         e.preventDefault()
@@ -96,15 +100,6 @@ const Products = ({ search = "" }) => {
         }, 2000);
     }
 
-    const filteredProducts = useMemo(() => {
-        if (!debouncedSearch.trim()) return products
-        const q = debouncedSearch.trim().toLowerCase()
-        return products.filter((p) => {
-            return p.title.toLowerCase().includes(q) ||
-                p.description?.toLowerCase().includes(q)
-        })
-    }, [debouncedSearch, products])
-
     return (
         <div className='min-h-screen bg-gray-100 '>
             {error && <div className='fixed top-20 right-4 bg-red-500 text-white px-4 py-3 rounded-lg shadow-lg z-50 text-sm'>{error}</div>}
@@ -114,7 +109,7 @@ const Products = ({ search = "" }) => {
                 <div className='px-2 py-2'>
                     <div className='flex gap-2 overflow-x-auto pb-1 scrollbar-hide'>
                         {categories.map((c) => {
-                            return <Link key={c} to={`/products?category=${c}&page=1&limit=10`}>
+                            return <Link key={c} to={`/products?category=${c}&page=1&limit=${limit}`}>
                                 <div className={`px-3 py-1.5 whitespace-nowrap text-xs font-medium rounded-full transition
                                     ${category === c ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-700'}`}>
                                     {c}
@@ -132,13 +127,13 @@ const Products = ({ search = "" }) => {
                     </div>
                     :
                     <>
-                        {filteredProducts.length === 0 ?
+                        {products.length === 0 ?
                             <div className='overflow-x-hidden text-center py-20 text-gray-500'>
                                 <p className='text-sm'>We're sorry <span className='text-accent font-semibold '>{debouncedSearch || category}</span> not found</p>
                             </div>
                             :
                             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
-                                {filteredProducts.map((product) => {
+                                {products.map((product) => {
                                     return <div
                                         key={product._id}
                                         onClick={() => { Navigate(`/product/${product._id}`) }}
@@ -147,14 +142,12 @@ const Products = ({ search = "" }) => {
                                         <div className='w-full h-40 sm:h-44 md:h-48 bg-gray-200 overflow-hidden'>
                                             <img className='w-full h-full object-cover' src={product.uri} alt={product.title} />
                                         </div>
-
                                         <div className='p-2'>
                                             <h1 className='font-semibold text-xs sm:text-sm line-clamp-2 mb-1'>{product.title}</h1>
                                             <div className='text-xs line-clamp-2 text-gray-600'>{product.description}</div>
                                             <div className='flex items-center justify-between mt-1 mb-2'>
                                                 <div className='text-red-600 font-bold text-sm sm:text-base'>Rs {product.price}</div>
                                             </div>
-
                                             <div className='flex gap-1.5'>
                                                 <button
                                                     className='flex-1 bg-orange-500 hover:bg-orange-600 text-white py-1.5 px-2 text-xs font-semibold rounded transition'

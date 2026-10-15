@@ -5,8 +5,9 @@ import { Link, useLocation } from 'react-router-dom';
 import pic from '../assets/pro.png'
 import { FaShoppingCart } from 'react-icons/fa';
 import Spinner from '../components/Spinner'
+
+const Products = lazy(() => import("../components/Products"))
 const Page1th = () => {
-    const Products = lazy(() => import("../components/Products"))
     const [search, setsearch] = useState("")
     const [Active, setActive] = useState(null)
     useEffect(() => {
@@ -14,7 +15,7 @@ const Page1th = () => {
         if (user) setActive(JSON.parse(user))
     }, [])
 
-    const searchDebounce = useMemo(() => search, [search])
+   
     return (
         <div className='min-h-screen'>
 
@@ -39,7 +40,7 @@ const Page1th = () => {
 
                 <div >
                     <Suspense fallback={<Spinner />}>
-                        <Products search={searchDebounce} />
+                        <Products search={search} />
                     </Suspense>
                 </div>
 
