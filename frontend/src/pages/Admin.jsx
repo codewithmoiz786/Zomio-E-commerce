@@ -1,25 +1,28 @@
 import React, { lazy, Suspense } from 'react'
 import Sidebar from '../components/Sidebar'
-import { Routes, Route, Link } from 'react-router-dom'
+import { Routes, Route, Link, useLocation } from 'react-router-dom'
 import Spinner from '../components/Spinner'
 
+const DashboardChart = lazy(() => import("./Dashboard"))
+const AddProduct = lazy(() => import("../components/AdminAddProduct"))
+const AdminAllProducts = lazy(() => import('../components/AdminAllProducts'))
+const Customers = lazy(() => import('./Customers'))
+const AllOrders = lazy(() => import('./AllOrders'))
+const Editproduct = lazy(() => import('../components/Editproduct'))
+const allAdminsFeatures = [
+    { path: "/dashboard", element: <DashboardChart /> },
+    { path: "/add-product", element: <AddProduct /> },
+    { path: "/products", element: <AdminAllProducts /> },
+    { path: "/editProduct/:id", element: <Editproduct /> },
+    { path: "/orders", element: <AllOrders /> },
+    { path: "/customers", element: <Customers /> }
+]
 const Admin = () => {
     const parse = localStorage.getItem("user")
     let user = JSON.parse(parse)
-    const DashboardChart = lazy(() => import("./Dashboard"))
-    const AddProduct = lazy(() => import("../components/AdminAddProduct"))
-    const AdminAllProducts = lazy(() => import('../components/AdminAllProducts'))
-    const Customers = lazy(() => import('./Customers'))
-    const AllOrders = lazy(() => import('./AllOrders'))
-    const Editproduct = lazy(() => import('../components/Editproduct'))
-    const allAdminsFeatures = [
-        { path: "/dashboard", element: <DashboardChart /> },
-        { path: "/add-product", element: <AddProduct /> },
-        { path: "/products", element: <AdminAllProducts /> },
-        { path: "/editProduct/:id", element: <Editproduct /> },
-        { path: "/orders", element: <AllOrders /> },
-        { path: "/customers", element: <Customers /> }
-    ]
+
+console.log(user);
+
     return (
         <>
             {!user && <div className='h-screen w-full flex items-center justify-center flex-col'>
@@ -35,8 +38,8 @@ const Admin = () => {
                 <div className='pt-16 md:mt-0 flex-1 md:p-6 p-1 overflow-y-auto max-h-screen bg-zinc-100'>
                     <Suspense fallback={<Spinner />}>
                         <Routes>
-                            {allAdminsFeatures.map((elem) => {
-                                return <Route path={elem.path} element={elem.element} />
+                            {allAdminsFeatures.map((elem, index) => {
+                                return <Route key={index} path={elem.path} element={elem.element} />
                             })}
                         </Routes>
                     </Suspense>
