@@ -21,7 +21,6 @@ const Admin = () => {
     const parse = localStorage.getItem("user")
     let user = JSON.parse(parse)
 
-console.log(user);
 
     return (
         <>

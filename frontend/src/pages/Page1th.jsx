@@ -1,8 +1,8 @@
 import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react'
-import FoodPic from '../assets/food12.jpeg'
+
 import { FaBoxOpen, FaSearch } from "react-icons/fa";
 import { Link, useLocation } from 'react-router-dom';
-import pic from '../assets/pro.png'
+
 import { FaShoppingCart } from 'react-icons/fa';
 import Spinner from '../components/Spinner'
 
@@ -15,7 +15,7 @@ const Page1th = () => {
         if (user) setActive(JSON.parse(user))
     }, [])
 
-   
+
     return (
         <div className='min-h-screen'>
 

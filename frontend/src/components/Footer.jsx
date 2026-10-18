@@ -2,6 +2,7 @@ import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { FaCross, FaFacebook, FaInstagram, FaTiktok, FaTwitter, FaWhatsapp, FaYoutube } from "react-icons/fa";
 import myimg from '../assets/me.png'
+import OwnerMe from '../assets/Owner.png'
 
 const Footer = () => {
     const year = new Date().getFullYear()
@@ -19,7 +20,6 @@ const Footer = () => {
                             Shop the latest products at the best prices. Fast delivery and quality guaranteed.
                         </p>
                         <p className='text-xs mt-4 text-primary'>Built by <span className='text-gray-900 font-semibold'>AbdulMoiz</span></p>
-
                     </div>
 
                     {/* 2. Quick Links */}
@@ -66,6 +66,10 @@ const Footer = () => {
                         <FaYoutube size={30} />
                         <FaInstagram size={30} />
                         <FaTwitter size={30} />
+
+                    </div>
+                    <div className='relative sm:flex justify-center items-center'>
+                        <img className=' lg:object-top lg:h-[450px] md:w-[36%] sm:w-1/2   md:h-[350px] rounded-md sm:mt-5 mt-3  object-cover' src={OwnerMe} alt="" />
                     </div>
                 </div>
 
